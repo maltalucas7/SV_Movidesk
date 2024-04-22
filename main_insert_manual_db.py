@@ -21,8 +21,8 @@ def contador_regressivo(segundos):
 
 def get_results_tickets(proxies, start_date, end_date, page_size=20):
     # Constantes
-    URL_BASE = os.getenv('acess_URL_BASE')
-    TOKEN = os.getenv('acess_TOKEN')
+    URL_BASE = "https://api.movidesk.com/public/v1/tickets"
+    TOKEN = "4700e23f-d2dc-49fe-9411-fea63a4bc3cd"
 
     start_date_str = start_date.strftime('%Y-%m-%dT03:00:00.00z')
     end_date_str = end_date.strftime('%Y-%m-%dT02:59:59.00z')
@@ -67,6 +67,7 @@ def get_results_tickets(proxies, start_date, end_date, page_size=20):
                 except requests.RequestException as e:
                     print(f"Incesucesso na requisição do ticket {ticket_id}")
                     contador_regressivo(60)  # Pausa a execução por 30 segundos antes de tentar novamente
+    print(list_tickets)                    
     return list_tickets
 
 def stringify_complex_columns(row):
@@ -78,6 +79,7 @@ def stringify_complex_columns(row):
 def processar_intervalo(PROXY, START_DATE, END_DATE):
     start_date_dt = datetime.strptime(START_DATE, "%Y-%m-%d")
     end_date_dt = datetime.strptime(END_DATE, "%Y-%m-%d") + timedelta(days=1)
+    print(start_date_dt, end_date_dt)
 
     df_resultados = pd.DataFrame()
 
@@ -289,8 +291,7 @@ def processar_intervalo(PROXY, START_DATE, END_DATE):
                                             93891:  "Valor_Cobrado_do_Cliente_(Real)",
                                             153478: "Valor_de_Entrada",
                                             153594: "Valor_Pagamento_Final",
-                                            178948: "Custo_SV",
-                                            92564:  "Detalhamento_Servico"
+                                            178948: "Custo_SV"
                                         }
                         
             def extract_custom_field_values(row, field_id):
@@ -451,8 +452,7 @@ def processar_intervalo(PROXY, START_DATE, END_DATE):
             '93891_Valor_Cobrado_do_Cliente_(Real)': 'real_client_charge',
             '153478_Valor_de_Entrada': 'entry_value',
             '153594_Valor_Pagamento_Final': 'final_payment_value',
-            '178948_Custo_SV': 'sv_cost',
-            '92564_Detalhamento_Servico': 'service_detail'
+            '178948_Custo_SV': 'sv_cost'
         }
 
         df_tickets_detalhados.rename(columns=renomear_colunas, inplace=True)
@@ -503,25 +503,17 @@ def upsert(df, table_name, connection_params):
 
 if __name__ == "__main__":
     PROXY = None
-    date_END = datetime.now()
-    date_START = date_END - timedelta(days=7)
-    START_DATE = date_START.strftime('%Y-%m-%d')
-    END_DATE = date_END.strftime('%Y-%m-%d')
+    START_DATE = '2000-01-01'
+    END_DATE = '2024-12-31'
     
-    tabela_mysql = os.getenv('tb_TICKETS')
-    
-    user = os.getenv('db_USER')
-    password = os.getenv('db_PASSWORD')
-    host = os.getenv('db_HOST')
-    port = os.getenv('db_PORT')
-    database = os.getenv('db_DATABASE')
+    tabela_mysql = 'movidesk_solarvolt_tb_tickets'
     
     connection_params = {
-        'user': user,
-        'password': password,
-        'host': host,
-        'port': port,
-        'database': database
+        'user': 'root',
+        'password': 'aTHGMloUmQVxLeiayGigZUzkDFnczIIB',
+        'host': 'monorail.proxy.rlwy.net',
+        'port': '19167',
+        'database': 'railway'
     }
 
     df_final = processar_intervalo(PROXY, START_DATE, END_DATE)

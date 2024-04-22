@@ -1,6 +1,3 @@
-import os
-import mysql.connector
-from mysql.connector import Error
 import pandas as pd
 import requests
 import ast
@@ -8,8 +5,8 @@ import numpy as np
 import datetime
 import time
 import humanize
+import os
 import sys
-from datetime import datetime, timedelta
 
 def contador_regressivo(segundos):
     for i in range(segundos, 0, -1):
@@ -21,8 +18,8 @@ def contador_regressivo(segundos):
 
 def get_results_tickets(proxies, start_date, end_date, page_size=20):
     # Constantes
-    URL_BASE = os.getenv('acess_URL_BASE')
-    TOKEN = os.getenv('acess_TOKEN')
+    URL_BASE = "https://api.movidesk.com/public/v1/tickets"
+    TOKEN = "4700e23f-d2dc-49fe-9411-fea63a4bc3cd"
 
     start_date_str = start_date.strftime('%Y-%m-%dT03:00:00.00z')
     end_date_str = end_date.strftime('%Y-%m-%dT02:59:59.00z')
@@ -76,8 +73,8 @@ def stringify_complex_columns(row):
     return row
 
 def processar_intervalo(PROXY, START_DATE, END_DATE):
-    start_date_dt = datetime.strptime(START_DATE, "%Y-%m-%d")
-    end_date_dt = datetime.strptime(END_DATE, "%Y-%m-%d") + timedelta(days=1)
+    start_date_dt = datetime.datetime.strptime(START_DATE, "%Y-%m-%d")
+    end_date_dt = datetime.datetime.strptime(END_DATE, "%Y-%m-%d") + datetime.timedelta(days=1)
 
     df_resultados = pd.DataFrame()
 
@@ -289,8 +286,7 @@ def processar_intervalo(PROXY, START_DATE, END_DATE):
                                             93891:  "Valor_Cobrado_do_Cliente_(Real)",
                                             153478: "Valor_de_Entrada",
                                             153594: "Valor_Pagamento_Final",
-                                            178948: "Custo_SV",
-                                            92564:  "Detalhamento_Servico"
+                                            178948: "Custo_SV"
                                         }
                         
             def extract_custom_field_values(row, field_id):
@@ -338,51 +334,6 @@ def processar_intervalo(PROXY, START_DATE, END_DATE):
             df_tickets_detalhados['153594_Valor_Pagamento_Final'] = df_tickets_detalhados['153594_Valor_Pagamento_Final'].apply(lambda x: x.replace('R$', '').strip() if isinstance(x, str) else x)
             df_tickets_detalhados['93889_Custo_Do_Servico'] = df_tickets_detalhados['93889_Custo_Do_Servico'].apply(lambda x: x.replace('R$', '').strip() if isinstance(x, str) else x)
 
-            df_tickets_detalhados['createdDate'] = pd.to_datetime(df_tickets_detalhados['createdDate'], dayfirst=True).dt.strftime('%Y-%m-%d %H:%M:%S')
-            df_tickets_detalhados['lastUpdate'] = pd.to_datetime(df_tickets_detalhados['lastUpdate'], dayfirst=True).dt.strftime('%Y-%m-%d %H:%M:%S')
-            df_tickets_detalhados['resolvedIn'] = pd.to_datetime(df_tickets_detalhados['resolvedIn'], dayfirst=True).dt.strftime('%Y-%m-%d %H:%M:%S')
-            df_tickets_detalhados['canceledIn'] = pd.to_datetime(df_tickets_detalhados['canceledIn'], dayfirst=True).dt.strftime('%Y-%m-%d %H:%M:%S')
-            df_tickets_detalhados['closedIn'] = pd.to_datetime(df_tickets_detalhados['closedIn'], dayfirst=True).dt.strftime('%Y-%m-%d %H:%M:%S')
-            df_tickets_detalhados['lastActionDate'] = pd.to_datetime(df_tickets_detalhados['lastActionDate'], dayfirst=True).dt.strftime('%Y-%m-%d %H:%M:%S')
-            df_tickets_detalhados['slaSolutionDate'] = pd.to_datetime(df_tickets_detalhados['slaSolutionDate'], dayfirst=True).dt.strftime('%Y-%m-%d %H:%M:%S')
-            
-            df_tickets_detalhados['93889_Custo_Do_Servico'] = df_tickets_detalhados['93889_Custo_Do_Servico'].replace('', None)
-            df_tickets_detalhados['153473_Custo_do_Serviço_(Previsto)'] = df_tickets_detalhados['153473_Custo_do_Serviço_(Previsto)'].replace('', None)
-            df_tickets_detalhados['93891_Valor_Cobrado_do_Cliente_(Real)'] = df_tickets_detalhados['93891_Valor_Cobrado_do_Cliente_(Real)'].replace('', None)
-            df_tickets_detalhados['153478_Valor_de_Entrada'] = df_tickets_detalhados['153478_Valor_de_Entrada'].replace('', None)
-            df_tickets_detalhados['153594_Valor_Pagamento_Final'] = df_tickets_detalhados['153594_Valor_Pagamento_Final'].replace('', None)
-            df_tickets_detalhados['178948_Custo_SV'] = df_tickets_detalhados['178948_Custo_SV'].replace('', None)
-            df_tickets_detalhados['153475_Valor_Cobrado_do_Cliente_(Previsto)'] = df_tickets_detalhados['153475_Valor_Cobrado_do_Cliente_(Previsto)'].replace('', None)
-
-            def convert_date(date):
-                try:
-                    return pd.to_datetime(date, format='%d/%m/%Y').strftime('%Y-%m-%d')
-                except:
-                    return None
-                
-            def convert_decimal(value):
-                try:
-                    return float(value.replace(',', '.'))
-                except ValueError:
-                    return value
-                except AttributeError:
-                    return value
-
-
-            df_tickets_detalhados['140568_Data_de_Inicio_(Usina_Parada)'] = df_tickets_detalhados['140568_Data_de_Inicio_(Usina_Parada)'].apply(convert_date)
-            df_tickets_detalhados['153480_Data_de_Pagamento_(Entrada)'] = df_tickets_detalhados['153480_Data_de_Pagamento_(Entrada)'].apply(convert_date)
-            df_tickets_detalhados['153593_Data_Pagamento_(Final)'] = df_tickets_detalhados['153593_Data_Pagamento_(Final)'].apply(convert_date)
-            df_tickets_detalhados['140569_Data_de_Solução_(Usina_Parada)'] = df_tickets_detalhados['140569_Data_de_Solução_(Usina_Parada)'].apply(convert_date)
-            df_tickets_detalhados['106738_Data_do_Proximo_Contato'] = df_tickets_detalhados['106738_Data_do_Proximo_Contato'].apply(convert_date)
-
-            df_tickets_detalhados['153475_Valor_Cobrado_do_Cliente_(Previsto)'] = df_tickets_detalhados['153475_Valor_Cobrado_do_Cliente_(Previsto)'].apply(convert_decimal)
-            df_tickets_detalhados['93891_Valor_Cobrado_do_Cliente_(Real)'] = df_tickets_detalhados['93891_Valor_Cobrado_do_Cliente_(Real)'].apply(convert_decimal)
-            df_tickets_detalhados['153478_Valor_de_Entrada'] = df_tickets_detalhados['153478_Valor_de_Entrada'].apply(convert_decimal)
-            df_tickets_detalhados['153594_Valor_Pagamento_Final'] = df_tickets_detalhados['153594_Valor_Pagamento_Final'].apply(convert_decimal)
-            df_tickets_detalhados['178948_Custo_SV'] = df_tickets_detalhados['178948_Custo_SV'].apply(convert_decimal)
-            df_tickets_detalhados['93889_Custo_Do_Servico'] = df_tickets_detalhados['93889_Custo_Do_Servico'].apply(convert_decimal)
-
-            df_tickets_detalhados.replace({np.nan: None}, inplace=True)
 
             # DROP COLUMNS
 
@@ -400,129 +351,59 @@ def processar_intervalo(PROXY, START_DATE, END_DATE):
                         ])
                         
             # FIM DAS CORREÇÕES DE BASE ----------------------------------------------------------------------------------------
-        
-        renomear_colunas = {
-            'id': 'id',
-            'subject': 'subject',
-            'serviceFirstLevel': 'service_first_level',
-            'category': 'category',
-            'urgency': 'urgency',
-            'status': 'status',
-            'justification': 'justification',
-            'isDeleted': 'is_deleted',
-            'createdDate': 'created_date',
-            'lastUpdate': 'last_update',
-            'resolvedIn': 'resolved_in',
-            'canceledIn': 'canceled_in',
-            'closedIn': 'closed_in',
-            'ownerTeam': 'owner_team',
-            'owner_businessName': 'owner_business_name',
-            'lifeTimeWorkingTime': 'life_time_working_time',
-            'stoppedTime': 'stopped_time',
-            'stoppedTimeWorkingTime': 'stopped_time_working_time',
-            'slaSolutionTime': 'sla_solution_time',
-            'slaResponseTime': 'sla_response_time',
-            'slaSolutionDate': 'sla_solution_date',
-            'lastActionDate': 'last_action_date',
-            'relativeTickets': 'relative_tickets',
-            'tag1': 'tag1',
-            'tag2': 'tag2',
-            'tag3': 'tag3',
-            'tag4': 'tag4',
-            'tag5': 'tag5',
-            '93892_Autorizado_Por': 'authorized_by',
-            '153473_Custo_do_Serviço_(Previsto)': 'estimated_service_cost',
-            '93889_Custo_Do_Servico': 'service_cost',
-            '140568_Data_de_Inicio_(Usina_Parada)': 'plant_downtime_start_date',
-            '153480_Data_de_Pagamento_(Entrada)': 'payment_entry_date',
-            '153593_Data_Pagamento_(Final)': 'final_payment_date',
-            '140569_Data_de_Solução_(Usina_Parada)': 'plant_downtime_solution_date',
-            '106738_Data_do_Proximo_Contato': 'next_contact_date',
-            '95239_Equipe_Responsável': 'responsible_team',
-            '93890_Garantia': 'warranty',
-            '146754_Justificativa_(Usina_Parada)': 'plant_downtime_justification',
-            '146010_Motivo_de_Atraso_SLA': 'sla_delay_reason',
-            '146011_Motivo_Atraso_SLA_(Complemento)': 'sla_delay_complement',
-            '146013_Motivo_Orçamentos_Zerados/Fora_de_Margem': 'zero_out_of_margin_budget_reason',
-            '146014_Motivo_Orçamentos_Zerados/Fora_de_Margem_(Complemento)': 'zero_out_of_margin_budget_complement',
-            '74474_Número_da_Pasta': 'file_number',
-            '158945_Pasta_do_Chamado': 'call_folder',
-            '153475_Valor_Cobrado_do_Cliente_(Previsto)': 'estimated_client_charge',
-            '93891_Valor_Cobrado_do_Cliente_(Real)': 'real_client_charge',
-            '153478_Valor_de_Entrada': 'entry_value',
-            '153594_Valor_Pagamento_Final': 'final_payment_value',
-            '178948_Custo_SV': 'sv_cost',
-            '92564_Detalhamento_Servico': 'service_detail'
-        }
 
-        df_tickets_detalhados.rename(columns=renomear_colunas, inplace=True)
-
-        # Filtrar apenas as colunas que foram renomeadas
-        colunas_para_manter = list(renomear_colunas.values())  # use values after rename to filter
-        df_tickets_detalhados = df_tickets_detalhados[colunas_para_manter]
-
-        # Concatenar ao DataFrame de resultados
         df_resultados = pd.concat([df_resultados, df_tickets_detalhados], ignore_index=True)
-        df_resultados = df_resultados.where(pd.notnull(df_resultados), None)
 
     return df_resultados
 
+def atualizar_ou_manter_tickets(df_novos_tickets, arquivo_excel):
+    if os.path.exists(arquivo_excel):
+        df_existente = pd.read_excel(arquivo_excel)
 
-def upsert(df, table_name, connection_params):
-    try:
-        # Inicia a conexão com o MySQL
-        connection = mysql.connector.connect(**connection_params)
-        cursor = connection.cursor()
+        # Garante que 'id' seja tratado como texto
+        df_existente['id'] = df_existente['id'].astype(str)
+        df_novos_tickets['id'] = df_novos_tickets['id'].astype(str)
+        
+        # Verifica se a coluna 'lastUpdate' existe. Se não, cria com valores NaT.
+        if 'lastUpdate' not in df_existente.columns:
+            df_existente['lastUpdate'] = pd.NaT  # Adiciona a coluna com valores padrão como Not a Time (NaT)
 
-        # Prepara a query de inserção com atualização em caso de duplicidade
-        placeholders = ", ".join(["%s"] * len(df.columns))
-        columns = ", ".join(df.columns)
-        updates = ", ".join(f"{col}=VALUES({col})" for col in df.columns if col != 'id')  # Presumindo que 'id' é a chave primária
-        query = (f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders}) "
-                 f"ON DUPLICATE KEY UPDATE {updates}")
+        # Converte 'lastUpdate' para datetime se ainda não estiver
+        df_existente['lastUpdate'] = pd.to_datetime(df_existente['lastUpdate'], errors='coerce')
+        df_novos_tickets['lastUpdate'] = pd.to_datetime(df_novos_tickets['lastUpdate'], errors='coerce', dayfirst=True)
 
-        # Prepara os dados para a inserção
-        data = [tuple(x) for x in df.to_numpy()]
+        # Combina os DataFrames existente e novos tickets
+        df_combinado = pd.concat([df_existente, df_novos_tickets])
+        
+        # Ordena por 'lastUpdate' para garantir que a última atualização fique por último
+        df_combinado.sort_values(by='lastUpdate', ascending=False, inplace=True)
+        
+        # Remove duplicatas mantendo a última entrada baseada no ID
+        df_atualizado = df_combinado.drop_duplicates(subset=['id'], keep='first')
+    else:
+        # Garante que 'id' seja tratado como texto antes de prosseguir
+        df_novos_tickets['id'] = df_novos_tickets['id'].astype(str)
+        df_atualizado = df_novos_tickets
 
-        # Executa a query para cada linha do dataframe
-        cursor.executemany(query, data)
-        connection.commit()  # Confirma as inserções/alterações na base
-
-        print(f"{cursor.rowcount} linhas inseridas/atualizadas.")
-
-    except Error as e:
-        print(f"Erro ao inserir dados no MySQL: {e}")
-
-    finally:
-        # Fecha o cursor e a conexão
-        if connection.is_connected():
-            cursor.close()
-            connection.close()
-            print("Conexão com MySQL fechada.")
-
-
+    return df_atualizado
 if __name__ == "__main__":
     PROXY = None
-    date_END = datetime.now()
-    date_START = date_END - timedelta(days=7)
-    START_DATE = date_START.strftime('%Y-%m-%d')
-    END_DATE = date_END.strftime('%Y-%m-%d')
-    
-    tabela_mysql = os.getenv('tb_TICKETS')
-    
-    user = os.getenv('db_USER')
-    password = os.getenv('db_PASSWORD')
-    host = os.getenv('db_HOST')
-    port = os.getenv('db_PORT')
-    database = os.getenv('db_DATABASE')
-    
-    connection_params = {
-        'user': user,
-        'password': password,
-        'host': host,
-        'port': port,
-        'database': database
-    }
+    START_DATE = "2000-01-01"
+    END_DATE = "2024-12-31"
+    #01-01-22 até 31-05-23 faltando
 
+    start_time = time.time()
     df_final = processar_intervalo(PROXY, START_DATE, END_DATE)
-    upsert(df_final, tabela_mysql, connection_params)
+    end_time = time.time()
+
+    if not df_final.empty:
+        arquivo_excel = 'Base_MD_SV.xlsx'
+        df_atualizado = atualizar_ou_manter_tickets(df_final, arquivo_excel)
+        df_atualizado.to_excel(arquivo_excel, index=False)
+        print("Resultados salvos com sucesso no arquivo Excel.")
+    else:
+        print("Nenhum resultado encontrado para o intervalo especificado.")
+
+    elapsed_time = end_time - start_time
+    formatted_time = humanize.precisedelta(elapsed_time, minimum_unit="seconds", format="%0.0f")
+    print(f"Tempo total de execução: {formatted_time}.")
