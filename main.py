@@ -76,8 +76,8 @@ def stringify_complex_columns(row):
     return row
 
 def processar_intervalo(PROXY, START_DATE, END_DATE):
-    start_date_dt = datetime.datetime.strptime(START_DATE, "%Y-%m-%d")
-    end_date_dt = datetime.datetime.strptime(END_DATE, "%Y-%m-%d") + datetime.timedelta(days=1)
+    start_date_dt = datetime.strptime(START_DATE, "%Y-%m-%d")
+    end_date_dt = datetime.strptime(END_DATE, "%Y-%m-%d") + timedelta(days=1)
 
     df_resultados = pd.DataFrame()
 
@@ -498,10 +498,10 @@ def upsert(df, table_name, connection_params):
             connection.close()
             print("Conexão com MySQL fechada.")
 
+
 if __name__ == "__main__":
     PROXY = None
-    # Corrigindo a chamada para datetime.now() sem o segundo .datetime
-    date_END = datetime.now()  
+    date_END = datetime.now()
     date_START = date_END - timedelta(days=7)
     START_DATE = date_START.strftime('%Y-%m-%d')
     END_DATE = date_END.strftime('%Y-%m-%d')
@@ -522,6 +522,5 @@ if __name__ == "__main__":
         'database': database
     }
 
-    # Supõe-se que as funções 'processar_intervalo' e 'upsert' estão definidas em outra parte do código
     df_final = processar_intervalo(PROXY, START_DATE, END_DATE)
     upsert(df_final, tabela_mysql, connection_params)
