@@ -498,14 +498,14 @@ def upsert(df, table_name, connection_params):
             connection.close()
             print("Conexão com MySQL fechada.")
 
-# Exemplo de como você chamaria a função upsert
 if __name__ == "__main__":
     PROXY = None
-    date_END = datetime.datetime.now()
+    # Corrigindo a chamada para datetime.now() sem o segundo .datetime
+    date_END = datetime.now()  
     date_START = date_END - timedelta(days=7)
     START_DATE = date_START.strftime('%Y-%m-%d')
     END_DATE = date_END.strftime('%Y-%m-%d')
-    # END_DATE = '2024-04-16'
+    
     tabela_mysql = os.getenv('tb_TICKETS')
     
     user = os.getenv('db_USER')
@@ -515,12 +515,13 @@ if __name__ == "__main__":
     database = os.getenv('db_DATABASE')
     
     connection_params = {
-        'user': f'{user}',
-        'password': f'{password}',
-        'host': f'{host}',
-        'port': f'{port}',
-        'database': f'{database}'
+        'user': user,
+        'password': password,
+        'host': host,
+        'port': port,
+        'database': database
     }
 
+    # Supõe-se que as funções 'processar_intervalo' e 'upsert' estão definidas em outra parte do código
     df_final = processar_intervalo(PROXY, START_DATE, END_DATE)
     upsert(df_final, tabela_mysql, connection_params)
