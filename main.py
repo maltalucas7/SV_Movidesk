@@ -9,6 +9,7 @@ import datetime
 import time
 import humanize
 import sys
+from datetime import datetime, timedelta
 
 def contador_regressivo(segundos):
     for i in range(segundos, 0, -1):
@@ -500,8 +501,10 @@ def upsert(df, table_name, connection_params):
 # Exemplo de como você chamaria a função upsert
 if __name__ == "__main__":
     PROXY = None
-    START_DATE = os.getenv('date_START')
-    END_DATE = os.getenv('date_END')
+    date_END = datetime.now()
+    date_START = date_END - timedelta(days=7)
+    START_DATE = date_START.strftime('%Y-%m-%d')
+    END_DATE = date_END.strftime('%Y-%m-%d')
     # END_DATE = '2024-04-16'
     tabela_mysql = os.getenv('tb_TICKETS')
     
