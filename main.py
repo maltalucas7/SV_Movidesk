@@ -501,7 +501,7 @@ def upsert(df, table_name, connection_params):
 # Exemplo de como você chamaria a função upsert
 if __name__ == "__main__":
     PROXY = None
-    date_END = datetime.now()
+    date_END = datetime.datetime.now()
     date_START = date_END - timedelta(days=7)
     START_DATE = date_START.strftime('%Y-%m-%d')
     END_DATE = date_END.strftime('%Y-%m-%d')
