@@ -289,7 +289,8 @@ def processar_intervalo(PROXY, START_DATE, END_DATE):
                                             93891:  "Valor_Cobrado_do_Cliente_(Real)",
                                             153478: "Valor_de_Entrada",
                                             153594: "Valor_Pagamento_Final",
-                                            178948: "Custo_SV"
+                                            178948: "Custo_SV",
+                                            92564:  "Detalhamento_Servico"
                                         }
                         
             def extract_custom_field_values(row, field_id):
@@ -450,7 +451,8 @@ def processar_intervalo(PROXY, START_DATE, END_DATE):
             '93891_Valor_Cobrado_do_Cliente_(Real)': 'real_client_charge',
             '153478_Valor_de_Entrada': 'entry_value',
             '153594_Valor_Pagamento_Final': 'final_payment_value',
-            '178948_Custo_SV': 'sv_cost'
+            '178948_Custo_SV': 'sv_cost',
+            '92564_Detalhamento_Servico': 'service_detail'
         }
 
         df_tickets_detalhados.rename(columns=renomear_colunas, inplace=True)
@@ -524,3 +526,6 @@ if __name__ == "__main__":
 
     df_final = processar_intervalo(PROXY, START_DATE, END_DATE)
     upsert(df_final, tabela_mysql, connection_params)
+    
+    
+# Inclusão campo: 92564
