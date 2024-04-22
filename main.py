@@ -1,3 +1,4 @@
+import os
 import mysql.connector
 from mysql.connector import Error
 import pandas as pd
@@ -19,8 +20,8 @@ def contador_regressivo(segundos):
 
 def get_results_tickets(proxies, start_date, end_date, page_size=20):
     # Constantes
-    URL_BASE = "https://api.movidesk.com/public/v1/tickets"
-    TOKEN = "4700e23f-d2dc-49fe-9411-fea63a4bc3cd"
+    URL_BASE = os.getenv('acess_URL_BASE')
+    TOKEN = os.getenv('acess_TOKEN')
 
     start_date_str = start_date.strftime('%Y-%m-%dT03:00:00.00z')
     end_date_str = end_date.strftime('%Y-%m-%dT02:59:59.00z')
@@ -499,16 +500,23 @@ def upsert(df, table_name, connection_params):
 # Exemplo de como você chamaria a função upsert
 if __name__ == "__main__":
     PROXY = None
-    START_DATE = '2024-04-16'
-    END_DATE = '2024-04-16'
-    tabela_mysql = 'movidesk_solarvolt_tb_tickets'
+    START_DATE = os.getenv('date_START')
+    END_DATE = os.getenv('date_END')
+    # END_DATE = '2024-04-16'
+    tabela_mysql = os.getenv('tb_TICKETS')
+    
+    user = os.getenv('db_USER')
+    password = os.getenv('db_PASSWORD')
+    host = os.getenv('db_HOST')
+    port = os.getenv('db_PORT')
+    database = os.getenv('db_DATABASE')
     
     connection_params = {
-        'user': 'root',
-        'password': 'aTHGMloUmQVxLeiayGigZUzkDFnczIIB',
-        'host': 'monorail.proxy.rlwy.net',
-        'port': '19167',
-        'database': 'railway'
+        'user': f'{user}',
+        'password': f'{password}',
+        'host': f'{host}',
+        'port': f'{port}',
+        'database': f'{database}'
     }
 
     df_final = processar_intervalo(PROXY, START_DATE, END_DATE)
